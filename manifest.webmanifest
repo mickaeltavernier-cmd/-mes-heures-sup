@@ -1,0 +1,12 @@
+{
+  "name": "Mes Heures Sup",
+  "short_name": "Heures Sup",
+  "description": "Suivi des heures supplémentaires et rapports mensuels.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#0b63f6",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

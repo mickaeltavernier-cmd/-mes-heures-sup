@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Heures Sup">
+  <meta name="description" content="Suivi simple des heures supplémentaires et rapports mensuels.">
+  <title>Mes Heures Sup</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    :root{--ink:#0d1b2a;--muted:#64748b;--line:#dce5f0;--paper:#fff;--bg:#f3f7fc;--blue:#0b63f6;--navy:#07111f;--mint:#72e6c7;--red:#d83b48;--shadow:0 12px 34px rgba(7,17,31,.10);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--navy) 0 250px,var(--bg) 250px);font-size:16px}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:760px;margin:auto;min-height:100vh;padding:env(safe-area-inset-top) 16px calc(92px + env(safe-area-inset-bottom))}.topbar{color:white;padding:22px 4px 16px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:12px}.brand img{width:42px;height:42px;border-radius:12px;box-shadow:0 6px 20px #0005}.brand h1{font-size:1.15rem;margin:0}.brand small{display:block;color:#aebed1;margin-top:2px}.ghost{border:1px solid #ffffff30;color:white;background:#ffffff12;border-radius:12px;padding:9px 12px}.view{display:none}.view.active{display:block}.hero{border-radius:24px;padding:24px;background:linear-gradient(135deg,#0b63f6,#0849b7);color:white;box-shadow:0 20px 46px #001f5c50;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-80px;top:-80px;border:34px solid #ffffff10}.hero .eyebrow{color:#cfe0ff;font-size:.88rem}.hero .big{font-size:3.2rem;font-weight:800;letter-spacing:-.06em;margin:8px 0 2px}.hero .sub{color:#dce8ff}.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}.metric{background:#ffffff16;border:1px solid #ffffff1f;border-radius:15px;padding:13px}.metric b{font-size:1.12rem}.metric span{display:block;color:#cfe0ff;font-size:.78rem;margin-top:3px}.section-title{display:flex;justify-content:space-between;align-items:end;margin:24px 4px 12px}.section-title h2{font-size:1.05rem;margin:0}.section-title span{font-size:.84rem;color:var(--muted)}.card{background:var(--paper);border-radius:20px;padding:18px;box-shadow:var(--shadow);border:1px solid #fff;margin-bottom:14px}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.quick button{background:white;border:1px solid var(--line);border-radius:15px;padding:14px 8px;color:var(--ink);font-weight:650}.quick button span{display:block;font-size:1.4rem;margin-bottom:5px}.primary{border:0;background:var(--blue);color:white;border-radius:15px;padding:14px 18px;font-weight:750;width:100%;box-shadow:0 8px 18px #0b63f633}.secondary{border:1px solid var(--line);background:white;color:var(--ink);border-radius:13px;padding:11px 14px;font-weight:650}.danger{color:var(--red)}.entry{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}.entry:last-child{border:0}.datebox{background:#eef4ff;color:var(--blue);border-radius:13px;text-align:center;padding:7px 3px}.datebox b{display:block;font-size:1.12rem}.datebox small{font-size:.68rem;text-transform:uppercase}.entry h3{font-size:.94rem;margin:0 0 4px}.entry p{font-size:.8rem;color:var(--muted);margin:0}.pill{background:#e6fbf5;color:#087c61;border-radius:999px;padding:7px 9px;font-size:.78rem;font-weight:800}.empty{text-align:center;color:var(--muted);padding:28px 12px}.empty strong{display:block;color:var(--ink);margin-bottom:6px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:.84rem;font-weight:700;color:#334155}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#f9fbfe;border-radius:13px;padding:13px;min-height:48px;color:var(--ink)}.field textarea{min-height:84px;resize:vertical}.calc{background:#eef5ff;border-radius:16px;padding:14px;margin:16px 0;display:flex;justify-content:space-between;gap:10px}.calc b{color:var(--blue)}.month-control{display:flex;align-items:center;justify-content:space-between;gap:10px}.month-control input{border:1px solid var(--line);padding:10px;border-radius:12px;background:white}.report-head{text-align:center;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:16px}.report-head h2{font-size:1.35rem;margin:0 0 5px}.report-table{width:100%;border-collapse:collapse;font-size:.82rem}.report-table th,.report-table td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left}.report-table th:last-child,.report-table td:last-child{text-align:right}.report-total{display:flex;justify-content:space-between;margin-top:18px;background:#eef5ff;border-radius:14px;padding:14px}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}.signatures div{border-top:1px solid var(--ink);padding-top:7px;color:var(--muted);font-size:.78rem}.bottom{position:fixed;z-index:20;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(4,1fr);background:#fffefa;border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -10px 28px #07111f12}.bottom button{border:0;background:none;color:#718096;padding:5px 2px;font-size:.7rem}.bottom button span{display:block;font-size:1.25rem;margin-bottom:2px}.bottom button.active{color:var(--blue);font-weight:800}.toast{position:fixed;z-index:50;left:50%;bottom:100px;transform:translate(-50%,20px);background:var(--navy);color:white;padding:12px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}dialog{border:0;border-radius:22px;padding:0;max-width:480px;width:calc(100% - 32px);box-shadow:0 30px 80px #07111f55}dialog::backdrop{background:#07111faa;backdrop-filter:blur(3px)}.dialog-body{padding:22px}.dialog-actions{display:flex;gap:10px;margin-top:18px}.dialog-actions>*{flex:1}.install{background:#e6fbf5;border:1px solid #bcefe2;color:#07664f;border-radius:16px;padding:14px;margin-bottom:14px}.install b{display:block;margin-bottom:4px}.install small{line-height:1.35}.hidden{display:none!important}
+    @media(max-width:430px){.app{padding-left:12px;padding-right:12px}.hero{padding:20px}.hero .big{font-size:2.75rem}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.report-table{font-size:.72rem}.report-table th,.report-table td{padding:8px 3px}.quick button{font-size:.8rem}}
+    @media print{body{background:white}.app{padding:0;max-width:none}.topbar,.bottom,.no-print,.view:not(#report){display:none!important}#report{display:block!important}.card{box-shadow:none;border:0;padding:0}.report-table{font-size:10pt}.report-head{margin-top:10mm}.signatures{margin-top:25mm}@page{margin:14mm}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <header class="topbar"><div class="brand"><img src="icon.svg" alt=""><div><h1>Mes Heures Sup</h1><small id="todayLabel"></small></div></div><button class="ghost" id="settingsBtn" aria-label="Réglages">⚙️</button></header>
+
+  <section id="home" class="view active">
+    <div id="installHint" class="install hidden"><b>Installer sur l’iPhone</b><small>Dans Safari, touche Partager, puis « Ajouter à l’écran d’accueil ».</small></div>
+    <div class="hero"><div class="eyebrow" id="heroMonth"></div><div class="big" id="heroOvertime">0 h 00</div><div class="sub">d’heures supplémentaires</div><div class="hero-grid"><div class="metric"><b id="workedTotal">0 h 00</b><span>heures prestées</span></div><div class="metric"><b id="daysTotal">0</b><span>jours encodés</span></div></div></div>
+    <div class="section-title"><h2>Accès rapide</h2></div>
+    <div class="quick"><button data-go="add"><span>＋</span>Ajouter</button><button data-go="history"><span>◫</span>Historique</button><button data-go="report"><span>↗</span>Rapport</button></div>
+    <div class="section-title"><h2>Dernières journées</h2><span id="scheduleBadge">38 h / semaine</span></div>
+    <div class="card" id="recentList"></div>
+  </section>
+
+  <section id="add" class="view">
+    <div class="card"><div class="section-title" style="margin-top:0"><h2 id="formTitle">Ajouter une journée</h2><span>Calcul automatique</span></div>
+      <form id="entryForm" class="form-grid">
+        <input type="hidden" id="editId">
+        <div class="field full"><label for="date">Date</label><input id="date" type="date" required></div>
+        <div class="field"><label for="start">Début</label><input id="start" type="time" value="08:30" required></div>
+        <div class="field"><label for="end">Fin</label><input id="end" type="time" value="17:30" required></div>
+        <div class="field full"><label for="breakMin">Pause</label><select id="breakMin"><option value="0">Aucune</option><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60" selected>1 heure</option><option value="90">1 h 30</option><option value="120">2 heures</option></select></div>
+        <div class="field full"><label for="comment">Commentaire / motif</label><textarea id="comment" placeholder="Ex. Livraison urgente"></textarea></div>
+        <div class="field full"><div class="calc"><span>Temps presté<br><b id="workedPreview">8 h 00</b></span><span style="text-align:right">Heures sup.<br><b id="overtimePreview">0 h 00</b></span></div></div>
+        <div class="field full"><button class="primary" type="submit">Enregistrer la journée</button></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="history" class="view">
+    <div class="card"><div class="month-control"><button class="secondary" id="prevMonth" aria-label="Mois précédent">‹</button><input id="historyMonth" type="month"><button class="secondary" id="nextMonth" aria-label="Mois suivant">›</button></div></div>
+    <div class="card" id="historyList"></div>
+  </section>
+
+  <section id="report" class="view">
+    <div class="card no-print"><div class="month-control"><button class="secondary" id="reportPrev">‹</button><input id="reportMonth" type="month"><button class="secondary" id="reportNext">›</button></div></div>
+    <div class="card" id="printArea">
+      <div class="report-head"><h2>Rapport mensuel — Heures supplémentaires</h2><div id="reportIdentity"></div><small id="reportPeriod"></small></div>
+      <table class="report-table"><thead><tr><th>Date</th><th>Horaire</th><th>Pause</th><th>Presté</th><th>Sup.</th></tr></thead><tbody id="reportBody"></tbody></table>
+      <div class="report-total"><strong>Total du mois</strong><strong id="reportTotal">0 h 00</strong></div>
+      <div class="signatures"><div>Signature du salarié</div><div>Signature de l’employeur</div></div>
+    </div>
+    <div class="quick no-print" style="margin-top:14px"><button id="printBtn"><span>⎙</span>PDF</button><button id="csvBtn"><span>⇩</span>Excel</button><button id="backupBtn"><span>☁</span>Sauvegarde</button></div>
+  </section>
+</main>
+
+<nav class="bottom no-print" aria-label="Navigation"><button class="active" data-view="home"><span>⌂</span>Accueil</button><button data-view="add"><span>＋</span>Ajouter</button><button data-view="history"><span>◫</span>Historique</button><button data-view="report"><span>↗</span>Rapport</button></nav>
+<dialog id="settingsDialog"><div class="dialog-body"><h2 style="margin-top:0">Réglages</h2><div class="form-grid"><div class="field full"><label for="employeeName">Nom du salarié</label><input id="employeeName" placeholder="Votre nom"></div><div class="field full"><label for="companyName">Entreprise</label><input id="companyName" placeholder="Nom de l’entreprise"></div><div class="field full"><label for="restoreFile">Restaurer une sauvegarde</label><input id="restoreFile" type="file" accept="application/json"></div></div><p style="font-size:.82rem;color:var(--muted)">Horaire : lundi–jeudi 8 h, vendredi 6 h. Les données restent sur cet appareil.</p><div class="dialog-actions"><button class="secondary" id="closeSettings">Annuler</button><button class="primary" id="saveSettings">Enregistrer</button></div></div></dialog>
+<dialog id="deleteDialog"><div class="dialog-body"><h2 style="margin-top:0">Supprimer cette journée ?</h2><p>Cette action ne pourra pas être annulée.</p><div class="dialog-actions"><button class="secondary" id="cancelDelete">Annuler</button><button class="primary" style="background:var(--red)" id="confirmDelete">Supprimer</button></div></div></dialog>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const KEY='mesHeuresSupV3';
+const state=JSON.parse(localStorage.getItem(KEY)||'{"entries":[],"settings":{"employee":"","company":""}}');
+state.entries=Array.isArray(state.entries)?state.entries:[]; state.settings=state.settings||{};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const pad=n=>String(n).padStart(2,'0');
+const isoLocal=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const monthKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+const now=new Date(); let activeMonth=monthKey(now), deleteId=null;
+const fmtMin=m=>`${Math.floor(Math.abs(m)/60)} h ${pad(Math.abs(m)%60)}`;
+const parseTime=t=>{const [h,m]=t.split(':').map(Number);return h*60+m};
+const normFor=date=>{const day=new Date(date+'T12:00:00').getDay();return day>=1&&day<=4?480:day===5?360:0};
+const calc=(start,end,br,date)=>{let span=parseTime(end)-parseTime(start);if(span<0)span+=1440;const worked=Math.max(0,span-Number(br));return{worked,overtime:Math.max(0,worked-normFor(date))}};
+const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+const toast=msg=>{const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900)};
+const frMonth=m=>new Intl.DateTimeFormat('fr-BE',{month:'long',year:'numeric'}).format(new Date(m+'-01T12:00:00'));
+const frDate=d=>new Intl.DateTimeFormat('fr-BE',{weekday:'short',day:'2-digit',month:'2-digit'}).format(new Date(d+'T12:00:00'));
+const monthEntries=m=>state.entries.filter(e=>e.date.startsWith(m)).sort((a,b)=>a.date.localeCompare(b.date));
+function setMonth(m){activeMonth=m;$('#historyMonth').value=m;$('#reportMonth').value=m;renderAll()}
+function shiftMonth(delta){const d=new Date(activeMonth+'-01T12:00:00');d.setMonth(d.getMonth()+delta);setMonth(monthKey(d))}
+function go(view){$$('.view').forEach(v=>v.classList.toggle('active',v.id===view));$$('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='add'&&!$('#editId').value)resetForm();if(view==='report')renderReport();scrollTo({top:0,behavior:'smooth'})}
+function renderAll(){const es=monthEntries(activeMonth),worked=es.reduce((s,e)=>s+e.worked,0),ot=es.reduce((s,e)=>s+e.overtime,0);$('#heroMonth').textContent=frMonth(activeMonth);$('#heroOvertime').textContent=fmtMin(ot);$('#workedTotal').textContent=fmtMin(worked);$('#daysTotal').textContent=es.length;renderEntries($('#recentList'),[...state.entries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4),true);renderEntries($('#historyList'),[...es].reverse(),false);renderReport()}
+function renderEntries(el,entries,compact){if(!entries.length){el.innerHTML='<div class="empty"><strong>Aucune journée encodée</strong>Ajoute tes heures pour commencer.</div>';return}el.innerHTML=entries.map(e=>{const d=new Date(e.date+'T12:00:00');return `<div class="entry"><div class="datebox"><b>${pad(d.getDate())}</b><small>${new Intl.DateTimeFormat('fr-BE',{month:'short'}).format(d)}</small></div><div><h3>${e.start} – ${e.end}</h3><p>${fmtMin(e.worked)} prestées${e.comment?' · '+escapeHtml(e.comment):''}</p></div><div><div class="pill">+ ${fmtMin(e.overtime)}</div>${compact?'':`<button class="secondary" style="margin-top:7px;padding:6px 9px" onclick="editEntry('${e.id}')">Modifier</button>`}</div></div>`}).join('')}
+const escapeHtml=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+function resetForm(){const d=isoLocal(new Date());$('#entryForm').reset();$('#editId').value='';$('#formTitle').textContent='Ajouter une journée';$('#date').value=d;$('#start').value='08:30';$('#end').value=new Date(d+'T12:00:00').getDay()===5?'15:30':'17:30';$('#breakMin').value='60';previewCalc()}
+function previewCalc(){if(!$('#date').value||!$('#start').value||!$('#end').value)return;const c=calc($('#start').value,$('#end').value,$('#breakMin').value,$('#date').value);$('#workedPreview').textContent=fmtMin(c.worked);$('#overtimePreview').textContent=fmtMin(c.overtime)}
+window.editEntry=id=>{const e=state.entries.find(x=>x.id===id);if(!e)return;$('#editId').value=e.id;$('#date').value=e.date;$('#start').value=e.start;$('#end').value=e.end;$('#breakMin').value=e.breakMin;$('#comment').value=e.comment||'';$('#formTitle').textContent='Modifier la journée';previewCalc();go('add');const btn=document.createElement('button');btn.type='button';btn.className='secondary danger';btn.textContent='Supprimer cette journée';btn.id='deleteCurrent';btn.style.gridColumn='1/-1';$('#entryForm').appendChild(btn);btn.onclick=()=>{$('#deleteDialog').showModal();deleteId=e.id}}
+$('#entryForm').addEventListener('submit',e=>{e.preventDefault();const date=$('#date').value,start=$('#start').value,end=$('#end').value,breakMin=Number($('#breakMin').value),id=$('#editId').value||crypto.randomUUID();const c=calc(start,end,breakMin,date);const entry={id,date,start,end,breakMin,comment:$('#comment').value.trim(),...c};const i=state.entries.findIndex(x=>x.id===id);if(i>=0)state.entries[i]=entry;else state.entries.push(entry);save();activeMonth=date.slice(0,7);setMonth(activeMonth);resetForm();go('home');toast('Journée enregistrée')});
+['date','start','end','breakMin'].forEach(id=>$('#'+id).addEventListener('input',previewCalc));
+function renderReport(){const es=monthEntries(activeMonth),ot=es.reduce((s,e)=>s+e.overtime,0);$('#reportIdentity').textContent=[state.settings.employee,state.settings.company].filter(Boolean).join(' — ')||'Salarié à compléter dans les réglages';$('#reportPeriod').textContent=frMonth(activeMonth);$('#reportBody').innerHTML=es.length?es.map(e=>`<tr><td>${frDate(e.date)}</td><td>${e.start}–${e.end}</td><td>${fmtMin(e.breakMin)}</td><td>${fmtMin(e.worked)}</td><td><b>${fmtMin(e.overtime)}</b></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:#64748b">Aucune donnée pour ce mois</td></tr>';$('#reportTotal').textContent=fmtMin(ot)}
+function download(name,type,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+$('#csvBtn').onclick=()=>{const rows=[['Date','Début','Fin','Pause (min)','Heures prestées','Heures supplémentaires','Commentaire'],...monthEntries(activeMonth).map(e=>[e.date,e.start,e.end,e.breakMin,(e.worked/60).toFixed(2).replace('.',','),(e.overtime/60).toFixed(2).replace('.',','),e.comment])];download(`heures-${activeMonth}.csv`,'text/csv;charset=utf-8','\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\n'));toast('Export créé')};
+$('#backupBtn').onclick=()=>{download(`sauvegarde-heures-${isoLocal(new Date())}.json`,'application/json',JSON.stringify(state,null,2));toast('Sauvegarde créée')};
+$('#printBtn').onclick=()=>window.print();
+$('#settingsBtn').onclick=()=>{$('#employeeName').value=state.settings.employee||'';$('#companyName').value=state.settings.company||'';$('#settingsDialog').showModal()};$('#closeSettings').onclick=()=>$('#settingsDialog').close();$('#saveSettings').onclick=()=>{state.settings={employee:$('#employeeName').value.trim(),company:$('#companyName').value.trim()};save();renderAll();$('#settingsDialog').close();toast('Réglages enregistrés')};
+$('#restoreFile').onchange=async e=>{try{const data=JSON.parse(await e.target.files[0].text());if(!Array.isArray(data.entries))throw 0;state.entries=data.entries;state.settings=data.settings||{};save();renderAll();$('#settingsDialog').close();toast('Sauvegarde restaurée')}catch{toast('Fichier de sauvegarde invalide')}};
+$('#cancelDelete').onclick=()=>$('#deleteDialog').close();$('#confirmDelete').onclick=()=>{state.entries=state.entries.filter(e=>e.id!==deleteId);save();$('#deleteDialog').close();deleteId=null;resetForm();renderAll();go('history');toast('Journée supprimée')};
+$$('[data-view]').forEach(b=>b.onclick=()=>go(b.dataset.view));$$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));$('#prevMonth').onclick=$('#reportPrev').onclick=()=>shiftMonth(-1);$('#nextMonth').onclick=$('#reportNext').onclick=()=>shiftMonth(1);$('#historyMonth').onchange=e=>setMonth(e.target.value);$('#reportMonth').onchange=e=>setMonth(e.target.value);
+$('#todayLabel').textContent=new Intl.DateTimeFormat('fr-BE',{weekday:'long',day:'numeric',month:'long'}).format(now);$('#historyMonth').value=activeMonth;$('#reportMonth').value=activeMonth;
+if(!window.matchMedia('(display-mode: standalone)').matches&&/iPhone|iPad/.test(navigator.userAgent))$('#installHint').classList.remove('hidden');
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');
+if(document.modelContext?.registerTool){document.modelContext.registerTool({name:'add_workday',title:'Ajouter une journée',description:'Ajoute une journée de travail et calcule les heures supplémentaires.',inputSchema:{type:'object',properties:{date:{type:'string'},start:{type:'string'},end:{type:'string'},breakMinutes:{type:'number'},comment:{type:'string'}},required:['date','start','end','breakMinutes'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){const c=calc(input.start,input.end,input.breakMinutes,input.date);const entry={id:crypto.randomUUID(),date:input.date,start:input.start,end:input.end,breakMin:input.breakMinutes,comment:input.comment||'',...c};state.entries.push(entry);save();renderAll();return{saved:true,overtimeMinutes:c.overtime}}})}
+resetForm();renderAll();
+</script>
+</body>
+</html>
