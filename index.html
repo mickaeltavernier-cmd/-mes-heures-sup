@@ -56,7 +56,7 @@
     <div class="card no-print"><div class="month-control"><button class="secondary" id="reportPrev">‹</button><input id="reportMonth" type="month"><button class="secondary" id="reportNext">›</button></div></div>
     <div class="card" id="printArea">
       <div class="report-head"><h2>Rapport mensuel — Heures supplémentaires</h2><div id="reportIdentity"></div><small id="reportPeriod"></small></div>
-      <table class="report-table"><thead><tr><th>Date</th><th>Horaire</th><th>Pause</th><th>Presté</th><th>Sup.</th></tr></thead><tbody id="reportBody"></tbody></table>
+      <table class="report-table"><thead><tr><th>Date</th><th>Horaire</th><th>Pause</th><th>Presté</th><th>Travail effectué</th><th>Sup.</th></tr></thead><tbody id="reportBody"></tbody></table>
       <div class="report-total"><strong>Total du mois</strong><strong id="reportTotal">0 h 00</strong></div>
       <div class="signatures"><div>Signature du salarié</div><div>Signature de l’employeur</div></div>
     </div>
@@ -97,11 +97,11 @@ function previewCalc(){if(!$('#date').value||!$('#start').value||!$('#end').valu
 window.editEntry=id=>{const e=state.entries.find(x=>x.id===id);if(!e)return;$('#editId').value=e.id;$('#date').value=e.date;$('#start').value=e.start;$('#end').value=e.end;$('#breakMin').value=e.breakMin;$('#comment').value=e.comment||'';$('#formTitle').textContent='Modifier la journée';previewCalc();go('add');const btn=document.createElement('button');btn.type='button';btn.className='secondary danger';btn.textContent='Supprimer cette journée';btn.id='deleteCurrent';btn.style.gridColumn='1/-1';$('#entryForm').appendChild(btn);btn.onclick=()=>{$('#deleteDialog').showModal();deleteId=e.id}}
 $('#entryForm').addEventListener('submit',e=>{e.preventDefault();const date=$('#date').value,start=$('#start').value,end=$('#end').value,breakMin=Number($('#breakMin').value),id=$('#editId').value||crypto.randomUUID();const c=calc(start,end,breakMin,date);const entry={id,date,start,end,breakMin,comment:$('#comment').value.trim(),...c};const i=state.entries.findIndex(x=>x.id===id);if(i>=0)state.entries[i]=entry;else state.entries.push(entry);save();activeMonth=date.slice(0,7);setMonth(activeMonth);resetForm();go('home');toast('Journée enregistrée')});
 ['date','start','end','breakMin'].forEach(id=>$('#'+id).addEventListener('input',previewCalc));
-function renderReport(){const es=monthEntries(activeMonth),ot=es.reduce((s,e)=>s+e.overtime,0);$('#reportIdentity').textContent=[state.settings.employee,state.settings.company].filter(Boolean).join(' — ')||'Salarié à compléter dans les réglages';$('#reportPeriod').textContent=frMonth(activeMonth);$('#reportBody').innerHTML=es.length?es.map(e=>`<tr><td>${frDate(e.date)}</td><td>${e.start}–${e.end}</td><td>${fmtMin(e.breakMin)}</td><td>${fmtMin(e.worked)}</td><td><b>${fmtMin(e.overtime)}</b></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:#64748b">Aucune donnée pour ce mois</td></tr>';$('#reportTotal').textContent=fmtMin(ot)}
+function renderReport(){const es=monthEntries(activeMonth),ot=es.reduce((s,e)=>s+e.overtime,0);$('#reportIdentity').textContent=[state.settings.employee,state.settings.company].filter(Boolean).join(' — ')||'Salarié à compléter dans les réglages';$('#reportPeriod').textContent=frMonth(activeMonth);$('#reportBody').innerHTML=es.length?es.map(e=>`<tr><td>${frDate(e.date)}</td><td>${e.start}–${e.end}</td><td>${fmtMin(e.breakMin)}</td><td>${fmtMin(e.worked)}</td><td>${escapeHtml(e.comment||'—')}</td><td><b>${fmtMin(e.overtime)}</b></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#64748b">Aucune donnée pour ce mois</td></tr>';$('#reportTotal').textContent=fmtMin(ot)}
 function download(name,type,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 function pdfSafe(text){return String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,' ').replace(/([\\()])/g,'\\$1')}
 function createMonthlyPdf(){
-  const entries=monthEntries(activeMonth), perPage=28;
+  const entries=monthEntries(activeMonth), perPage=16;
   const chunks=entries.length?Array.from({length:Math.ceil(entries.length/perPage)},(_,i)=>entries.slice(i*perPage,(i+1)*perPage)):[[]];
   const total=entries.reduce((s,e)=>s+e.overtime,0), objects=[];
   const text=(x,y,size,value)=>`BT /F1 ${size} Tf ${x} ${y} Td (${pdfSafe(value)}) Tj ET\n`;
@@ -119,7 +119,7 @@ function createMonthlyPdf(){
     c+=line(40,727,555,727);
     let y=709;
     if(!rows.length)c+=text(40,y,10,'Aucune journee encodee pour ce mois.');
-    rows.forEach(e=>{c+=text(40,y,9,frDate(e.date))+text(130,y,9,`${e.start} - ${e.end}`)+text(245,y,9,fmtMin(e.breakMin))+text(330,y,9,fmtMin(e.worked))+text(430,y,9,fmtMin(e.overtime));c+=line(40,y-7,555,y-7);y-=21});
+    rows.forEach(e=>{const words=pdfSafe(e.comment||'Non renseigne').split(/\s+/);let commentLines=[''];for(const word of words){const last=commentLines.length-1;if((commentLines[last]+' '+word).trim().length<=88)commentLines[last]=(commentLines[last]+' '+word).trim();else if(commentLines.length<2)commentLines.push(word);else{commentLines[1]=(commentLines[1]+'...').slice(0,88);break}}c+=text(40,y,9,frDate(e.date))+text(130,y,9,`${e.start} - ${e.end}`)+text(245,y,9,fmtMin(e.breakMin))+text(330,y,9,fmtMin(e.worked))+text(430,y,9,fmtMin(e.overtime));c+=text(58,y-12,8,`Travail : ${commentLines[0]}`);if(commentLines[1])c+=text(98,y-23,8,commentLines[1]);c+=line(40,y-(commentLines[1]?29:18),555,y-(commentLines[1]?29:18));y-=commentLines[1]?39:29});
     if(pageIndex===chunks.length-1){c+=text(330,80,12,'TOTAL HEURES SUPPLEMENTAIRES :')+text(500,80,12,fmtMin(total));c+=text(40,42,9,'Signature du salarie')+text(360,42,9,"Signature de l'employeur");c+=line(40,58,210,58)+line(360,58,530,58)}
     c+=text(500,20,8,`Page ${pageIndex+1}/${chunks.length}`);
     const pageObj=4+pageIndex*2,contentObj=pageObj+1;
