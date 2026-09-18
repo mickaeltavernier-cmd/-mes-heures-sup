@@ -99,9 +99,44 @@ $('#entryForm').addEventListener('submit',e=>{e.preventDefault();const date=$('#
 ['date','start','end','breakMin'].forEach(id=>$('#'+id).addEventListener('input',previewCalc));
 function renderReport(){const es=monthEntries(activeMonth),ot=es.reduce((s,e)=>s+e.overtime,0);$('#reportIdentity').textContent=[state.settings.employee,state.settings.company].filter(Boolean).join(' — ')||'Salarié à compléter dans les réglages';$('#reportPeriod').textContent=frMonth(activeMonth);$('#reportBody').innerHTML=es.length?es.map(e=>`<tr><td>${frDate(e.date)}</td><td>${e.start}–${e.end}</td><td>${fmtMin(e.breakMin)}</td><td>${fmtMin(e.worked)}</td><td><b>${fmtMin(e.overtime)}</b></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:#64748b">Aucune donnée pour ce mois</td></tr>';$('#reportTotal').textContent=fmtMin(ot)}
 function download(name,type,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function pdfSafe(text){return String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,' ').replace(/([\\()])/g,'\\$1')}
+function createMonthlyPdf(){
+  const entries=monthEntries(activeMonth), perPage=28;
+  const chunks=entries.length?Array.from({length:Math.ceil(entries.length/perPage)},(_,i)=>entries.slice(i*perPage,(i+1)*perPage)):[[]];
+  const total=entries.reduce((s,e)=>s+e.overtime,0), objects=[];
+  const text=(x,y,size,value)=>`BT /F1 ${size} Tf ${x} ${y} Td (${pdfSafe(value)}) Tj ET\n`;
+  const line=(x1,y1,x2,y2)=>`0.5 w ${x1} ${y1} m ${x2} ${y2} l S\n`;
+  objects[1]='<< /Type /Catalog /Pages 2 0 R >>';
+  const kids=chunks.map((_,i)=>`${4+i*2} 0 R`).join(' ');
+  objects[2]=`<< /Type /Pages /Kids [${kids}] /Count ${chunks.length} >>`;
+  objects[3]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>';
+  chunks.forEach((rows,pageIndex)=>{
+    let c=text(40,806,17,'RAPPORT MENSUEL - HEURES SUPPLEMENTAIRES');
+    c+=text(40,782,10,`Salarie : ${state.settings.employee||'Non renseigne'}`);
+    c+=text(330,782,10,`Entreprise : ${state.settings.company||'Non renseignee'}`);
+    c+=text(40,763,11,`Periode : ${frMonth(activeMonth)}`)+line(40,754,555,754);
+    c+=text(40,735,9,'Date')+text(130,735,9,'Horaire')+text(245,735,9,'Pause')+text(330,735,9,'Preste')+text(430,735,9,'Heures sup.');
+    c+=line(40,727,555,727);
+    let y=709;
+    if(!rows.length)c+=text(40,y,10,'Aucune journee encodee pour ce mois.');
+    rows.forEach(e=>{c+=text(40,y,9,frDate(e.date))+text(130,y,9,`${e.start} - ${e.end}`)+text(245,y,9,fmtMin(e.breakMin))+text(330,y,9,fmtMin(e.worked))+text(430,y,9,fmtMin(e.overtime));c+=line(40,y-7,555,y-7);y-=21});
+    if(pageIndex===chunks.length-1){c+=text(330,80,12,'TOTAL HEURES SUPPLEMENTAIRES :')+text(500,80,12,fmtMin(total));c+=text(40,42,9,'Signature du salarie')+text(360,42,9,"Signature de l'employeur");c+=line(40,58,210,58)+line(360,58,530,58)}
+    c+=text(500,20,8,`Page ${pageIndex+1}/${chunks.length}`);
+    const pageObj=4+pageIndex*2,contentObj=pageObj+1;
+    objects[pageObj]=`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentObj} 0 R >>`;
+    objects[contentObj]=`<< /Length ${c.length} >>\nstream\n${c}endstream`;
+  });
+  let pdf='%PDF-1.4\n', offsets=[0];
+  for(let i=1;i<objects.length;i++){offsets[i]=pdf.length;pdf+=`${i} 0 obj\n${objects[i]}\nendobj\n`}
+  const xref=pdf.length;pdf+=`xref\n0 ${objects.length}\n0000000000 65535 f \n`;
+  for(let i=1;i<objects.length;i++)pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+  pdf+=`trailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  const url=URL.createObjectURL(new Blob([new TextEncoder().encode(pdf)],{type:'application/pdf'}));
+  const a=document.createElement('a');a.href=url;a.target='_blank';a.download=`rapport-heures-${activeMonth}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);toast('PDF cree');
+}
 $('#csvBtn').onclick=()=>{const rows=[['Date','Début','Fin','Pause (min)','Heures prestées','Heures supplémentaires','Commentaire'],...monthEntries(activeMonth).map(e=>[e.date,e.start,e.end,e.breakMin,(e.worked/60).toFixed(2).replace('.',','),(e.overtime/60).toFixed(2).replace('.',','),e.comment])];download(`heures-${activeMonth}.csv`,'text/csv;charset=utf-8','\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\n'));toast('Export créé')};
 $('#backupBtn').onclick=()=>{download(`sauvegarde-heures-${isoLocal(new Date())}.json`,'application/json',JSON.stringify(state,null,2));toast('Sauvegarde créée')};
-$('#printBtn').onclick=()=>window.print();
+$('#printBtn').onclick=createMonthlyPdf;
 $('#settingsBtn').onclick=()=>{$('#employeeName').value=state.settings.employee||'';$('#companyName').value=state.settings.company||'';$('#settingsDialog').showModal()};$('#closeSettings').onclick=()=>$('#settingsDialog').close();$('#saveSettings').onclick=()=>{state.settings={employee:$('#employeeName').value.trim(),company:$('#companyName').value.trim()};save();renderAll();$('#settingsDialog').close();toast('Réglages enregistrés')};
 $('#restoreFile').onchange=async e=>{try{const data=JSON.parse(await e.target.files[0].text());if(!Array.isArray(data.entries))throw 0;state.entries=data.entries;state.settings=data.settings||{};save();renderAll();$('#settingsDialog').close();toast('Sauvegarde restaurée')}catch{toast('Fichier de sauvegarde invalide')}};
 $('#cancelDelete').onclick=()=>$('#deleteDialog').close();$('#confirmDelete').onclick=()=>{state.entries=state.entries.filter(e=>e.id!==deleteId);save();$('#deleteDialog').close();deleteId=null;resetForm();renderAll();go('history');toast('Journée supprimée')};
