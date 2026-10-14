@@ -27,6 +27,8 @@
   <section id="home" class="view active">
     <div id="installHint" class="install hidden"><b>Installer sur l’iPhone</b><small>Dans Safari, touche Partager, puis « Ajouter à l’écran d’accueil ».</small></div>
     <div class="hero"><div class="eyebrow" id="heroMonth"></div><div class="big" id="heroOvertime">0 h 00</div><div class="sub">solde d’heures du mois</div><div class="hero-grid"><div class="metric"><b id="workedTotal">0 h 00</b><span>heures prestées</span></div><div class="metric"><b id="daysTotal">0</b><span>jours encodés</span></div></div></div>
+    <div class="section-title"><h2>Depuis la première saisie</h2></div>
+    <div class="card"><div class="hero-grid" style="margin-top:0"><div><strong id="allExtra">0 h 00</strong><div style="color:var(--muted);font-size:.84rem">Heures en plus</div></div><div><strong id="allBalance">0 h 00</strong><div style="color:var(--muted);font-size:.84rem">Solde après déduction</div></div></div></div>
     <div class="section-title"><h2>Accès rapide</h2></div>
     <div class="quick"><button data-go="add"><span>＋</span>Ajouter</button><button data-go="history"><span>◫</span>Historique</button><button data-go="report"><span>↗</span>Rapport</button></div>
     <div class="section-title"><h2>Dernières journées</h2><span id="scheduleBadge">38 h / semaine</span></div>
@@ -58,7 +60,10 @@
     <div class="card" id="printArea">
       <div class="report-head"><h2>Rapport mensuel — Solde d’heures</h2><div id="reportIdentity"></div><small id="reportPeriod"></small></div>
       <table class="report-table"><thead><tr><th>Date</th><th>Horaire</th><th>Pause</th><th>Presté</th><th>Travail effectué</th><th>Solde</th></tr></thead><tbody id="reportBody"></tbody></table>
-      <div class="report-total"><strong>Total du mois</strong><strong id="reportTotal">0 h 00</strong></div>
+      <div class="report-total"><strong>Heures en plus ce mois</strong><strong id="reportExtra">0 h 00</strong></div>
+      <div class="report-total"><strong>Heures manquantes ce mois</strong><strong id="reportMissing">0 h 00</strong></div>
+      <div class="report-total"><strong>Solde du mois</strong><strong id="reportTotal">0 h 00</strong></div>
+      <div class="report-total"><strong>Solde cumulé jusqu’à ce mois</strong><strong id="reportCumulative">0 h 00</strong></div>
       <div class="signatures"><div>Signature du salarié</div><div>Signature de l’employeur</div></div>
     </div>
     <div class="quick no-print" style="margin-top:14px"><button id="printBtn"><span>⎙</span>PDF</button><button id="csvBtn"><span>⇩</span>Excel</button><button id="backupBtn"><span>☁</span>Sauvegarde</button></div>
@@ -85,6 +90,7 @@ const normFor=date=>{const day=new Date(date+'T12:00:00').getDay();return day>=1
 const calc=(start,end,br,date)=>{let span=parseTime(end)-parseTime(start);if(span<0)span+=1440;const worked=Math.max(0,span-Number(br));return{worked,overtime:worked-normFor(date)}};
 // Recalculate older saved days, which stored zero instead of a negative balance.
 const balanceFor=e=>Number(e.worked)-normFor(e.date);
+const totalsFor=entries=>entries.reduce((t,e)=>{const balance=balanceFor(e);t.extra+=Math.max(0,balance);t.missing+=Math.min(0,balance);return t},{extra:0,missing:0});
 const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
 const toast=msg=>{const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900)};
 const frMonth=m=>new Intl.DateTimeFormat('fr-BE',{month:'long',year:'numeric'}).format(new Date(m+'-01T12:00:00'));
@@ -93,7 +99,7 @@ const monthEntries=m=>state.entries.filter(e=>e.date.startsWith(m)).sort((a,b)=>
 function setMonth(m){activeMonth=m;$('#historyMonth').value=m;$('#reportMonth').value=m;renderAll()}
 function shiftMonth(delta){const d=new Date(activeMonth+'-01T12:00:00');d.setMonth(d.getMonth()+delta);setMonth(monthKey(d))}
 function go(view){$$('.view').forEach(v=>v.classList.toggle('active',v.id===view));$$('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='add'&&!$('#editId').value)resetForm();if(view==='report')renderReport();scrollTo({top:0,behavior:'smooth'})}
-function renderAll(){const es=monthEntries(activeMonth),worked=es.reduce((s,e)=>s+e.worked,0),ot=es.reduce((s,e)=>s+balanceFor(e),0);$('#heroMonth').textContent=frMonth(activeMonth);$('#heroOvertime').textContent=fmtBalance(ot);$('#workedTotal').textContent=fmtMin(worked);$('#daysTotal').textContent=es.length;renderEntries($('#recentList'),[...state.entries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4),true);renderEntries($('#historyList'),[...es].reverse(),false);renderReport()}
+function renderAll(){const es=monthEntries(activeMonth),worked=es.reduce((s,e)=>s+e.worked,0),month=totalsFor(es),all=totalsFor(state.entries);$('#heroMonth').textContent=frMonth(activeMonth);$('#heroOvertime').textContent=fmtBalance(month.extra+month.missing);$('#workedTotal').textContent=fmtMin(worked);$('#daysTotal').textContent=es.length;$('#allExtra').textContent=fmtMin(all.extra);$('#allBalance').textContent=fmtBalance(all.extra+all.missing);renderEntries($('#recentList'),[...state.entries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4),true);renderEntries($('#historyList'),[...es].reverse(),false);renderReport()}
 function renderEntries(el,entries,compact){if(!entries.length){el.innerHTML='<div class="empty"><strong>Aucune journée encodée</strong>Ajoute tes heures pour commencer.</div>';return}el.innerHTML=entries.map(e=>{const d=new Date(e.date+'T12:00:00'),balance=balanceFor(e);return `<div class="entry"><div class="datebox"><b>${pad(d.getDate())}</b><small>${new Intl.DateTimeFormat('fr-BE',{month:'short'}).format(d)}</small></div><div><h3>${e.start} – ${e.end}</h3><p>${fmtMin(e.worked)} prestées${e.comment?' · '+escapeHtml(e.comment):''}</p></div><div><div class="pill ${balance<0?'negative':''}">${fmtBalance(balance)}</div>${compact?'':`<button class="secondary" style="margin-top:7px;padding:6px 9px" onclick="editEntry('${e.id}')">Modifier</button>`}</div></div>`}).join('')}
 const escapeHtml=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 function resetForm(){const d=isoLocal(new Date());$('#entryForm').reset();$('#editId').value='';$('#formTitle').textContent='Ajouter une journée';$('#date').value=d;$('#start').value='08:30';$('#end').value=new Date(d+'T12:00:00').getDay()===5?'15:30':'17:30';$('#breakMin').value='60';previewCalc()}
@@ -101,13 +107,13 @@ function previewCalc(){if(!$('#date').value||!$('#start').value||!$('#end').valu
 window.editEntry=id=>{const e=state.entries.find(x=>x.id===id);if(!e)return;$('#editId').value=e.id;$('#date').value=e.date;$('#start').value=e.start;$('#end').value=e.end;$('#breakMin').value=e.breakMin;$('#comment').value=e.comment||'';$('#formTitle').textContent='Modifier la journée';previewCalc();go('add');const btn=document.createElement('button');btn.type='button';btn.className='secondary danger';btn.textContent='Supprimer cette journée';btn.id='deleteCurrent';btn.style.gridColumn='1/-1';$('#entryForm').appendChild(btn);btn.onclick=()=>{$('#deleteDialog').showModal();deleteId=e.id}}
 $('#entryForm').addEventListener('submit',e=>{e.preventDefault();const date=$('#date').value,start=$('#start').value,end=$('#end').value,breakMin=Number($('#breakMin').value),id=$('#editId').value||crypto.randomUUID();const c=calc(start,end,breakMin,date);const entry={id,date,start,end,breakMin,comment:$('#comment').value.trim(),...c};const i=state.entries.findIndex(x=>x.id===id);if(i>=0)state.entries[i]=entry;else state.entries.push(entry);save();activeMonth=date.slice(0,7);setMonth(activeMonth);resetForm();go('home');toast('Journée enregistrée')});
 ['date','start','end','breakMin'].forEach(id=>$('#'+id).addEventListener('input',previewCalc));
-function renderReport(){const es=monthEntries(activeMonth),ot=es.reduce((s,e)=>s+balanceFor(e),0);$('#reportIdentity').textContent=[state.settings.employee,state.settings.company].filter(Boolean).join(' — ')||'Salarié à compléter dans les réglages';$('#reportPeriod').textContent=frMonth(activeMonth);$('#reportBody').innerHTML=es.length?es.map(e=>`<tr><td>${frDate(e.date)}</td><td>${e.start}–${e.end}</td><td>${fmtMin(e.breakMin)}</td><td>${fmtMin(e.worked)}</td><td>${escapeHtml(e.comment||'—')}</td><td><b>${fmtBalance(balanceFor(e))}</b></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#64748b">Aucune donnée pour ce mois</td></tr>';$('#reportTotal').textContent=fmtBalance(ot)}
+function renderReport(){const es=monthEntries(activeMonth),month=totalsFor(es),cumulative=totalsFor(state.entries.filter(e=>e.date.slice(0,7)<=activeMonth));$('#reportIdentity').textContent=[state.settings.employee,state.settings.company].filter(Boolean).join(' — ')||'Salarié à compléter dans les réglages';$('#reportPeriod').textContent=frMonth(activeMonth);$('#reportBody').innerHTML=es.length?es.map(e=>`<tr><td>${frDate(e.date)}</td><td>${e.start}–${e.end}</td><td>${fmtMin(e.breakMin)}</td><td>${fmtMin(e.worked)}</td><td>${escapeHtml(e.comment||'—')}</td><td><b>${fmtBalance(balanceFor(e))}</b></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#64748b">Aucune donnée pour ce mois</td></tr>';$('#reportExtra').textContent=fmtMin(month.extra);$('#reportMissing').textContent=fmtBalance(month.missing);$('#reportTotal').textContent=fmtBalance(month.extra+month.missing);$('#reportCumulative').textContent=fmtBalance(cumulative.extra+cumulative.missing)}
 function download(name,type,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 function pdfSafe(text){return String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,' ').replace(/([\\()])/g,'\\$1')}
 function createMonthlyPdf(){
-  const entries=monthEntries(activeMonth), perPage=14;
+  const entries=monthEntries(activeMonth), perPage=13;
   const chunks=entries.length?Array.from({length:Math.ceil(entries.length/perPage)},(_,i)=>entries.slice(i*perPage,(i+1)*perPage)):[[]];
-  const total=entries.reduce((s,e)=>s+balanceFor(e),0), objects=[];
+  const month=totalsFor(entries),cumulative=totalsFor(state.entries.filter(e=>e.date.slice(0,7)<=activeMonth)),objects=[];
   const text=(x,y,size,value)=>`BT /F1 ${size} Tf ${x} ${y} Td (${pdfSafe(value)}) Tj ET\n`;
   const line=(x1,y1,x2,y2)=>`0.5 w ${x1} ${y1} m ${x2} ${y2} l S\n`;
   objects[1]='<< /Type /Catalog /Pages 2 0 R >>';
@@ -124,7 +130,7 @@ function createMonthlyPdf(){
     let y=709;
     if(!rows.length)c+=text(40,y,10,'Aucune journee encodee pour ce mois.');
     rows.forEach(e=>{const words=pdfSafe(e.comment||'Non renseigne').split(/\s+/);let commentLines=[''];for(const word of words){const last=commentLines.length-1;if((commentLines[last]+' '+word).trim().length<=88)commentLines[last]=(commentLines[last]+' '+word).trim();else if(commentLines.length<2)commentLines.push(word);else{commentLines[1]=(commentLines[1]+'...').slice(0,88);break}}c+=text(40,y,9,frDate(e.date))+text(130,y,9,`${e.start} - ${e.end}`)+text(245,y,9,fmtMin(e.breakMin))+text(330,y,9,fmtMin(e.worked))+text(430,y,9,fmtBalance(balanceFor(e)));c+=text(58,y-12,8,`Travail : ${commentLines[0]}`);if(commentLines[1])c+=text(98,y-23,8,commentLines[1]);c+=line(40,y-(commentLines[1]?29:18),555,y-(commentLines[1]?29:18));y-=commentLines[1]?39:29});
-    if(pageIndex===chunks.length-1){c+=text(345,80,10,'SOLDE TOTAL :')+text(460,80,11,fmtBalance(total));c+=text(40,42,9,'Signature du salarie')+text(360,42,9,"Signature de l'employeur");c+=line(40,58,210,58)+line(360,58,530,58)}
+    if(pageIndex===chunks.length-1){c+=line(300,155,555,155);c+=text(310,140,10,'Heures en plus du mois :')+text(485,140,10,fmtMin(month.extra));c+=text(310,123,10,'Heures manquantes du mois :')+text(485,123,10,fmtBalance(month.missing));c+=text(310,106,10,'Solde du mois :')+text(485,106,10,fmtBalance(month.extra+month.missing));c+=text(310,89,10,'Solde cumule a fin de mois :')+text(485,89,10,fmtBalance(cumulative.extra+cumulative.missing));c+=text(40,42,9,'Signature du salarie')+text(360,42,9,"Signature de l'employeur");c+=line(40,58,210,58)+line(360,58,530,58)}
     c+=text(500,20,8,`Page ${pageIndex+1}/${chunks.length}`);
     const pageObj=4+pageIndex*2,contentObj=pageObj+1;
     objects[pageObj]=`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentObj} 0 R >>`;
